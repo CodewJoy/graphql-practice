@@ -1,6 +1,9 @@
-var express = require("express");
-var { graphqlHTTP } = require("express-graphql");
 var { buildSchema } = require("graphql");
+// Express.js 是一個 Web Application 框架
+var express = require("express");
+// 建立 GraphQL server：這裡使用 Node.js 的 express-graphql 套件
+// express-graphql 擴展了 Express.js，使其能夠輕鬆處理 GraphQL 請求)
+var { graphqlHTTP } = require("express-graphql");
 
 // test query
 /*
@@ -30,11 +33,6 @@ subscription {
 }
 */
 
-// Sample data (to simulate a database)
-const users = [
-  { id: "1", name: "Alice", age: 25 },
-  { id: "2", name: "Bob", age: 30 },
-];
 // Construct a schema, using GraphQL schema language
 // 定義 Schema 來描述數據模型和操作。
 // ! 表示 non-nullable
@@ -55,17 +53,20 @@ const schema = buildSchema(`
   type Mutation {
     createUser(name: String!, age: Int!): User!
   }
-  type Subscription {
-    newUser: User!
-  }
 `);
-
-// The root provides a resolver function for each API endpoint
+// Sample data (to simulate a database)
+const users = [
+  { id: "1", name: "Alice", age: 25 },
+  { id: "2", name: "Bob", age: 30 },
+];
+// The root provides resolver functions for API endpoint
+// 定義 Resolver，Resolver 是一個函式，用於處理 query 和 mutation 請求，並返回相應的數據。
 const root = {
   // query
   hello: () => "Hello world!",
   users: () => users,
   user: ({ id }) => {
+    // 帶參數
     const foundUser = users.find((user) => user.id === id);
     return foundUser ? foundUser : null; // Handling user not found
   },
@@ -78,11 +79,9 @@ const root = {
   },
 };
 
-// 建立 GraphQL server：這裡使用 Node.js 的 express-graphql 套件。
-//（Express.js 本身是一個 Web Application 框架，而 express-graphql 擴展了 Express.js，使其能夠輕鬆處理 GraphQL 請求)
 var app = express();
 app.use(
-  "/graphql",
+  "/graphql", // 設置 GraphQL endpoint：用於接收和處理客戶端的 query 和 mutation 請求
   graphqlHTTP({
     schema: schema,
     rootValue: root,
